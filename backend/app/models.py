@@ -1,8 +1,9 @@
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field
+from sqlmodel import Relationship
+from sqlmodel import SQLModel
 
 
 # Shared properties
-# TODO replace email str with EmailStr when sqlmodel supports it
 class UserBase(SQLModel):
     email: str = Field(unique=True, index=True)
     is_active: bool = True
@@ -15,7 +16,6 @@ class UserCreate(UserBase):
     password: str
 
 
-# TODO replace email str with EmailStr when sqlmodel supports it
 class UserCreateOpen(SQLModel):
     email: str
     password: str
@@ -23,13 +23,11 @@ class UserCreateOpen(SQLModel):
 
 
 # Properties to receive via API on update, all are optional
-# TODO replace email str with EmailStr when sqlmodel supports it
 class UserUpdate(UserBase):
     email: str | None = None  # type: ignore
     password: str | None = None
 
 
-# TODO replace email str with EmailStr when sqlmodel supports it
 class UserUpdateMe(SQLModel):
     full_name: str | None = None
     email: str | None = None

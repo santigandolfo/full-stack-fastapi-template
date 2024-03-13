@@ -1,31 +1,33 @@
 import secrets
 import warnings
-from typing import Annotated, Any, Literal
+from typing import Annotated
+from typing import Literal
+from typing import Self
 
-from pydantic import (
-    AnyUrl,
-    BeforeValidator,
-    HttpUrl,
-    PostgresDsn,
-    computed_field,
-    model_validator,
-)
+from pydantic import AnyUrl
+from pydantic import BeforeValidator
+from pydantic import HttpUrl
+from pydantic import PostgresDsn
+from pydantic import computed_field
+from pydantic import model_validator
 from pydantic_core import MultiHostUrl
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing_extensions import Self
+from pydantic_settings import BaseSettings
+from pydantic_settings import SettingsConfigDict
 
 
-def parse_cors(v: Any) -> list[str] | str:
+def parse_cors(v: any) -> list[str] | str:
     if isinstance(v, str) and not v.startswith("["):
         return [i.strip() for i in v.split(",")]
-    elif isinstance(v, list | str):
+    if isinstance(v, list | str):
         return v
     raise ValueError(v)
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env", env_ignore_empty=True, extra="ignore"
+        env_file=".env",
+        env_ignore_empty=True,
+        extra="ignore",
     )
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = secrets.token_urlsafe(32)
@@ -36,14 +38,15 @@ class Settings(BaseSettings):
 
     @computed_field  # type: ignore[misc]
     @property
-    def server_host(self) -> str:
+    def server_host(self: "Settings") -> str:
         # Use HTTPS for anything other than local development
         if self.ENVIRONMENT == "local":
             return f"http://{self.DOMAIN}"
         return f"https://{self.DOMAIN}"
 
     BACKEND_CORS_ORIGINS: Annotated[
-        list[AnyUrl] | str, BeforeValidator(parse_cors)
+        list[AnyUrl] | str,
+        BeforeValidator(parse_cors),
     ] = []
 
     PROJECT_NAME: str
@@ -56,7 +59,7 @@ class Settings(BaseSettings):
 
     @computed_field  # type: ignore[misc]
     @property
-    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
+    def sqlalchemy_database_uri(self: "Settings") -> PostgresDsn:
         return MultiHostUrl.build(
             scheme="postgresql+psycopg",
             username=self.POSTGRES_USER,
@@ -72,12 +75,11 @@ class Settings(BaseSettings):
     SMTP_HOST: str | None = None
     SMTP_USER: str | None = None
     SMTP_PASSWORD: str | None = None
-    # TODO: update type to EmailStr when sqlmodel supports it
     EMAILS_FROM_EMAIL: str | None = None
     EMAILS_FROM_NAME: str | None = None
 
     @model_validator(mode="after")
-    def _set_default_emails_from(self) -> Self:
+    def _set_default_emails_from(self: "Settings") -> Self:
         if not self.EMAILS_FROM_NAME:
             self.EMAILS_FROM_NAME = self.PROJECT_NAME
         return self
@@ -86,17 +88,19 @@ class Settings(BaseSettings):
 
     @computed_field  # type: ignore[misc]
     @property
-    def emails_enabled(self) -> bool:
+    def emails_enabled(self: "Settings") -> bool:
         return bool(self.SMTP_HOST and self.EMAILS_FROM_EMAIL)
 
-    # TODO: update type to EmailStr when sqlmodel supports it
     EMAIL_TEST_USER: str = "test@example.com"
-    # TODO: update type to EmailStr when sqlmodel supports it
     FIRST_SUPERUSER: str
     FIRST_SUPERUSER_PASSWORD: str
     USERS_OPEN_REGISTRATION: bool = False
 
-    def _check_default_secret(self, var_name: str, value: str | None) -> None:
+    def _check_default_secret(
+        self: "Settings",
+        var_name: str,
+        value: str | None,
+    ) -> None:
         if value == "changethis":
             message = (
                 f'The value of {var_name} is "changethis", '
@@ -108,11 +112,12 @@ class Settings(BaseSettings):
                 raise ValueError(message)
 
     @model_validator(mode="after")
-    def _enforce_non_default_secrets(self) -> Self:
+    def _enforce_non_default_secrets(self: "Settings") -> Self:
         self._check_default_secret("SECRET_KEY", self.SECRET_KEY)
         self._check_default_secret("POSTGRES_PASSWORD", self.POSTGRES_PASSWORD)
         self._check_default_secret(
-            "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
+            "FIRST_SUPERUSER_PASSWORD",
+            self.FIRST_SUPERUSER_PASSWORD,
         )
 
         return self

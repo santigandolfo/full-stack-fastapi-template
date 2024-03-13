@@ -1,12 +1,12 @@
-import ReactDOM from 'react-dom/client'
 import { ChakraProvider } from '@chakra-ui/react'
-import { QueryClient, QueryClientProvider } from 'react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
+import ReactDOM from 'react-dom/client'
+import { QueryClient, QueryClientProvider } from 'react-query'
 import { routeTree } from './routeTree.gen'
 
+import { StrictMode } from 'react'
 import { OpenAPI } from './client'
 import theme from './theme'
-import { StrictMode } from 'react'
 
 OpenAPI.BASE = import.meta.env.VITE_API_URL
 OpenAPI.TOKEN = async () => {
@@ -22,12 +22,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <ChakraProvider theme={theme}>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
-    </ChakraProvider>
-  </StrictMode>,
-)
+const rootElement = document.getElementById('root')
+if (rootElement) {
+  ReactDOM.createRoot(rootElement).render(
+    <StrictMode>
+      <ChakraProvider theme={theme}>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+        </QueryClientProvider>
+      </ChakraProvider>
+    </StrictMode>,
+  )
+} else {
+  console.error('Unable to find root element.')
+}

@@ -9,10 +9,10 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
-import { SubmitHandler, useForm } from 'react-hook-form'
+import { type SubmitHandler, useForm } from 'react-hook-form'
 import { useMutation } from 'react-query'
 
-import { ApiError, LoginService, NewPassword } from '../client'
+import { type ApiError, LoginService, type NewPassword } from '../client'
 import { isLoggedIn } from '../hooks/useAuth'
 import useCustomToast from '../hooks/useCustomToast'
 
@@ -50,8 +50,9 @@ function ResetPassword() {
 
   const resetPassword = async (data: NewPassword) => {
     const token = new URLSearchParams(window.location.search).get('token')
+    if (!token) return
     await LoginService.resetPassword({
-      requestBody: { new_password: data.new_password, token: token! },
+      requestBody: { new_password: data.new_password, token: token },
     })
   }
 

@@ -6,7 +6,8 @@ from app.tests.utils.item import create_random_item
 
 
 def test_create_item(
-    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
 ) -> None:
     data = {"title": "Foo", "description": "Fighters"}
     response = client.post(
@@ -23,7 +24,9 @@ def test_create_item(
 
 
 def test_read_item(
-    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
+    db: Session,
 ) -> None:
     item = create_random_item(db)
     response = client.get(
@@ -39,7 +42,8 @@ def test_read_item(
 
 
 def test_read_item_not_found(
-    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
 ) -> None:
     response = client.get(
         f"{settings.API_V1_STR}/items/999",
@@ -51,7 +55,9 @@ def test_read_item_not_found(
 
 
 def test_read_item_not_enough_permissions(
-    client: TestClient, normal_user_token_headers: dict[str, str], db: Session
+    client: TestClient,
+    normal_user_token_headers: dict[str, str],
+    db: Session,
 ) -> None:
     item = create_random_item(db)
     response = client.get(
@@ -64,7 +70,9 @@ def test_read_item_not_enough_permissions(
 
 
 def test_read_items(
-    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
+    db: Session,
 ) -> None:
     create_random_item(db)
     create_random_item(db)
@@ -78,7 +86,9 @@ def test_read_items(
 
 
 def test_update_item(
-    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
+    db: Session,
 ) -> None:
     item = create_random_item(db)
     data = {"title": "Updated title", "description": "Updated description"}
@@ -96,7 +106,8 @@ def test_update_item(
 
 
 def test_update_item_not_found(
-    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
 ) -> None:
     data = {"title": "Updated title", "description": "Updated description"}
     response = client.put(
@@ -110,7 +121,9 @@ def test_update_item_not_found(
 
 
 def test_update_item_not_enough_permissions(
-    client: TestClient, normal_user_token_headers: dict[str, str], db: Session
+    client: TestClient,
+    normal_user_token_headers: dict[str, str],
+    db: Session,
 ) -> None:
     item = create_random_item(db)
     data = {"title": "Updated title", "description": "Updated description"}
@@ -125,7 +138,9 @@ def test_update_item_not_enough_permissions(
 
 
 def test_delete_item(
-    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
+    db: Session,
 ) -> None:
     item = create_random_item(db)
     response = client.delete(
@@ -138,7 +153,8 @@ def test_delete_item(
 
 
 def test_delete_item_not_found(
-    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
 ) -> None:
     response = client.delete(
         f"{settings.API_V1_STR}/items/999",
@@ -150,7 +166,9 @@ def test_delete_item_not_found(
 
 
 def test_delete_item_not_enough_permissions(
-    client: TestClient, normal_user_token_headers: dict[str, str], db: Session
+    client: TestClient,
+    normal_user_token_headers: dict[str, str],
+    db: Session,
 ) -> None:
     item = create_random_item(db)
     response = client.delete(

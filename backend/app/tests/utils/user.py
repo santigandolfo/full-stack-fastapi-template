@@ -3,32 +3,39 @@ from sqlmodel import Session
 
 from app import crud
 from app.core.config import settings
-from app.models import User, UserCreate, UserUpdate
-from app.tests.utils.utils import random_email, random_lower_string
+from app.models import User
+from app.models import UserCreate
+from app.models import UserUpdate
+from app.tests.utils.utils import random_email
+from app.tests.utils.utils import random_lower_string
 
 
 def user_authentication_headers(
-    *, client: TestClient, email: str, password: str
+    *,
+    client: TestClient,
+    email: str,
+    password: str,
 ) -> dict[str, str]:
     data = {"username": email, "password": password}
 
     r = client.post(f"{settings.API_V1_STR}/login/access-token", data=data)
     response = r.json()
     auth_token = response["access_token"]
-    headers = {"Authorization": f"Bearer {auth_token}"}
-    return headers
+    return {"Authorization": f"Bearer {auth_token}"}
 
 
 def create_random_user(db: Session) -> User:
     email = random_email()
     password = random_lower_string()
     user_in = UserCreate(email=email, password=password)
-    user = crud.create_user(session=db, user_create=user_in)
-    return user
+    return crud.create_user(session=db, user_create=user_in)
 
 
 def authentication_token_from_email(
-    *, client: TestClient, email: str, db: Session
+    *,
+    client: TestClient,
+    email: str,
+    db: Session,
 ) -> dict[str, str]:
     """
     Return a valid token for the user with given email.
