@@ -8,7 +8,8 @@
     "build": "tsc && vite build",
     "lint": "biome check --apply-unsafe --no-errors-on-unmatched --files-ignore-unknown=true ./",
     "preview": "vite preview",
-    "generate-client": "openapi --input ./openapi.json --useOptions --useUnionTypes --output ./src/client --client axios --exportSchemas true"
+    "generate-client": "openapi --input ./openapi.json --useOptions --useUnionTypes --output ./src/client --client axios --exportSchemas true",
+    "prepare": "husky"
   },
   "dependencies": {
     "@chakra-ui/icons": "2.1.1",
@@ -36,6 +37,12 @@
     "openapi-typescript-codegen": "0.25.0",
     "typescript": "^5.2.2",
     "vite": "^5.0.12",
-    "@biomejs/biome": "1.6.1"
+    "@biomejs/biome": "1.6.1",
+    "husky": "^9.0.11"
+  },
+  "lint-staged": {
+    "*": [
+      "biome check --apply-unsafe --no-errors-on-unmatched --files-ignore-unknown=true"
+    ]
   }
 }
