@@ -27,7 +27,8 @@ def test_get_access_token_incorrect_password(client: TestClient) -> None:
 
 
 def test_use_access_token(
-    client: TestClient, superuser_token_headers: dict[str, str]
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
 ) -> None:
     r = client.post(
         f"{settings.API_V1_STR}/login/test-token",
@@ -39,7 +40,9 @@ def test_use_access_token(
 
 
 def test_recovery_password(
-    client: TestClient, normal_user_token_headers: dict[str, str], mocker: MockerFixture
+    client: TestClient,
+    normal_user_token_headers: dict[str, str],
+    mocker: MockerFixture,
 ) -> None:
     mocker.patch("app.utils.send_email", return_value=None)
     mocker.patch("app.core.config.settings.SMTP_HOST", "smtp.example.com")
@@ -54,7 +57,8 @@ def test_recovery_password(
 
 
 def test_recovery_password_user_not_exits(
-    client: TestClient, normal_user_token_headers: dict[str, str]
+    client: TestClient,
+    normal_user_token_headers: dict[str, str],
 ) -> None:
     email = "jVgQr@example.com"
     r = client.post(
@@ -65,7 +69,8 @@ def test_recovery_password_user_not_exits(
 
 
 def test_reset_password(
-    client: TestClient, superuser_token_headers: dict[str, str]
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
 ) -> None:
     token = generate_password_reset_token(email=settings.FIRST_SUPERUSER)
     data = {"new_password": "changethis", "token": token}
@@ -79,7 +84,8 @@ def test_reset_password(
 
 
 def test_reset_password_invalid_token(
-    client: TestClient, superuser_token_headers: dict[str, str]
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
 ) -> None:
     data = {"new_password": "changethis", "token": "invalid"}
     r = client.post(

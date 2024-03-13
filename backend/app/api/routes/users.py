@@ -1,37 +1,40 @@
-from typing import Any
-
-from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import col, delete, func, select
+from fastapi import APIRouter
+from fastapi import Depends
+from fastapi import HTTPException
+from sqlmodel import col
+from sqlmodel import delete
+from sqlmodel import func
+from sqlmodel import select
 
 from app import crud
-from app.api.deps import (
-    CurrentUser,
-    SessionDep,
-    get_current_active_superuser,
-)
+from app.api.deps import CurrentUser
+from app.api.deps import SessionDep
+from app.api.deps import get_current_active_superuser
 from app.core.config import settings
-from app.core.security import get_password_hash, verify_password
-from app.models import (
-    Item,
-    Message,
-    UpdatePassword,
-    User,
-    UserCreate,
-    UserCreateOpen,
-    UserOut,
-    UsersOut,
-    UserUpdate,
-    UserUpdateMe,
-)
-from app.utils import generate_new_account_email, send_email
+from app.core.security import get_password_hash
+from app.core.security import verify_password
+from app.models import Item
+from app.models import Message
+from app.models import UpdatePassword
+from app.models import User
+from app.models import UserCreate
+from app.models import UserCreateOpen
+from app.models import UserOut
+from app.models import UsersOut
+from app.models import UserUpdate
+from app.models import UserUpdateMe
+from app.utils import generate_new_account_email
+from app.utils import send_email
 
 router = APIRouter()
 
 
 @router.get(
-    "/", dependencies=[Depends(get_current_active_superuser)], response_model=UsersOut
+    "/",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_model=UsersOut,
 )
-def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
+def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> UsersOut:
     """
     Retrieve users.
     """
@@ -46,9 +49,11 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
 
 
 @router.post(
-    "/", dependencies=[Depends(get_current_active_superuser)], response_model=UserOut
+    "/",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_model=UserOut,
 )
-def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
+def create_user(*, session: SessionDep, user_in: UserCreate) -> UserOut:
     """
     Create new user.
     """
@@ -62,7 +67,9 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
     user = crud.create_user(session=session, user_create=user_in)
     if settings.emails_enabled and user_in.email:
         email_data = generate_new_account_email(
-            email_to=user_in.email, username=user_in.email, password=user_in.password
+            email_to=user_in.email,
+            username=user_in.email,
+            password=user_in.password,
         )
         send_email(
             email_to=user_in.email,
@@ -74,8 +81,11 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
 
 @router.patch("/me", response_model=UserOut)
 def update_user_me(
-    *, session: SessionDep, user_in: UserUpdateMe, current_user: CurrentUser
-) -> Any:
+    *,
+    session: SessionDep,
+    user_in: UserUpdateMe,
+    current_user: CurrentUser,
+) -> UserOut:
     """
     Update own user.
     """
@@ -84,7 +94,8 @@ def update_user_me(
         existing_user = crud.get_user_by_email(session=session, email=user_in.email)
         if existing_user and existing_user.id != current_user.id:
             raise HTTPException(
-                status_code=409, detail="User with this email already exists"
+                status_code=409,
+                detail="User with this email already exists",
             )
     user_data = user_in.model_dump(exclude_unset=True)
     current_user.sqlmodel_update(user_data)
@@ -96,8 +107,11 @@ def update_user_me(
 
 @router.patch("/me/password", response_model=Message)
 def update_password_me(
-    *, session: SessionDep, body: UpdatePassword, current_user: CurrentUser
-) -> Any:
+    *,
+    session: SessionDep,
+    body: UpdatePassword,
+    current_user: CurrentUser,
+) -> Message:
     """
     Update own password.
     """
@@ -105,7 +119,8 @@ def update_password_me(
         raise HTTPException(status_code=400, detail="Incorrect password")
     if body.current_password == body.new_password:
         raise HTTPException(
-            status_code=400, detail="New password cannot be the same as the current one"
+            status_code=400,
+            detail="New password cannot be the same as the current one",
         )
     hashed_password = get_password_hash(body.new_password)
     current_user.hashed_password = hashed_password
@@ -115,7 +130,7 @@ def update_password_me(
 
 
 @router.get("/me", response_model=UserOut)
-def read_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
+def read_user_me(current_user: CurrentUser) -> UserOut:
     """
     Get current user.
     """
@@ -123,7 +138,7 @@ def read_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
 
 
 @router.post("/open", response_model=UserOut)
-def create_user_open(session: SessionDep, user_in: UserCreateOpen) -> Any:
+def create_user_open(session: SessionDep, user_in: UserCreateOpen) -> UserOut:
     """
     Create new user without the need to be logged in.
     """
@@ -139,14 +154,15 @@ def create_user_open(session: SessionDep, user_in: UserCreateOpen) -> Any:
             detail="The user with this email already exists in the system",
         )
     user_create = UserCreate.from_orm(user_in)
-    user = crud.create_user(session=session, user_create=user_create)
-    return user
+    return crud.create_user(session=session, user_create=user_create)
 
 
 @router.get("/{user_id}", response_model=UserOut)
 def read_user_by_id(
-    user_id: int, session: SessionDep, current_user: CurrentUser
-) -> Any:
+    user_id: int,
+    session: SessionDep,
+    current_user: CurrentUser,
+) -> UserOut:
     """
     Get a specific user by id.
     """
@@ -171,7 +187,7 @@ def update_user(
     session: SessionDep,
     user_id: int,
     user_in: UserUpdate,
-) -> Any:
+) -> UserOut:
     """
     Update a user.
     """
@@ -186,16 +202,18 @@ def update_user(
         existing_user = crud.get_user_by_email(session=session, email=user_in.email)
         if existing_user and existing_user.id != user_id:
             raise HTTPException(
-                status_code=409, detail="User with this email already exists"
+                status_code=409,
+                detail="User with this email already exists",
             )
 
-    db_user = crud.update_user(session=session, db_user=db_user, user_in=user_in)
-    return db_user
+    return crud.update_user(session=session, db_user=db_user, user_in=user_in)
 
 
 @router.delete("/{user_id}")
 def delete_user(
-    session: SessionDep, current_user: CurrentUser, user_id: int
+    session: SessionDep,
+    current_user: CurrentUser,
+    user_id: int,
 ) -> Message:
     """
     Delete a user.
@@ -203,13 +221,15 @@ def delete_user(
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    elif user != current_user and not current_user.is_superuser:
+    if user != current_user and not current_user.is_superuser:
         raise HTTPException(
-            status_code=403, detail="The user doesn't have enough privileges"
+            status_code=403,
+            detail="The user doesn't have enough privileges",
         )
-    elif user == current_user and current_user.is_superuser:
+    if user == current_user and current_user.is_superuser:
         raise HTTPException(
-            status_code=403, detail="Super users are not allowed to delete themselves"
+            status_code=403,
+            detail="Super users are not allowed to delete themselves",
         )
 
     statement = delete(Item).where(col(Item.owner_id) == user_id)

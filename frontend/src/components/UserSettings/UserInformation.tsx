@@ -1,4 +1,3 @@
-import React, { useState } from 'react'
 import {
   Box,
   Button,
@@ -12,10 +11,17 @@ import {
   Text,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { SubmitHandler, useForm } from 'react-hook-form'
+import type React from 'react'
+import { useState } from 'react'
+import { type SubmitHandler, useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from 'react-query'
 
-import { ApiError, UserOut, UserUpdateMe, UsersService } from '../../client'
+import {
+  type ApiError,
+  type UserOut,
+  type UserUpdateMe,
+  UsersService,
+} from '../../client'
 import useAuth from '../../hooks/useAuth'
 import useCustomToast from '../../hooks/useCustomToast'
 
@@ -118,7 +124,7 @@ const UserInformation: React.FC = () => {
               />
             ) : (
               <Text size="md" py={2}>
-                {currentUser!.email}
+                {currentUser?.email}
               </Text>
             )}
             {errors.email && (
