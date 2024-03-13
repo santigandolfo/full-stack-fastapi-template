@@ -1,4 +1,4 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-bunx lint-staged
+cd frontend && bunx lint-staged
