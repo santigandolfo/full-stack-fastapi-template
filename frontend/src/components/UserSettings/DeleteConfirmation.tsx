@@ -55,6 +55,7 @@ const DeleteConfirmation: React.FC<DeleteProps> = ({ isOpen, onClose }) => {
   })
 
   const onSubmit = async () => {
+    if(!currentUser) return;
     mutation.mutate(currentUser?.id)
   }
 
